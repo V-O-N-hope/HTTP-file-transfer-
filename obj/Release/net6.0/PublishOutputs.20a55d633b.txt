@@ -1,0 +1,8 @@
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\WebAplic_test.exe
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\appsettings.Development.json
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\appsettings.json
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\users.json
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\WebAplic_test.dll
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\WebAplic_test.deps.json
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\WebAplic_test.runtimeconfig.json
+D:\work\C#\WebAplic_test\obj\Release\net6.0\PubTmp\Out\WebAplic_test.pdb
