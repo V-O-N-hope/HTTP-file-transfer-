@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>My Drive</title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous" />
+    
+</head>
+<body>
+    '
+    <script src="/_framework/aspnetcore-browser-refresh.js"></script>
+
+    <nav class="navbar navbar-expand-md navbar-light bg-dark">
+        <a class="navbar-brand" href="/">My Drive</a>
+        <button class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Add Log Out button -->
+        <button class="btn btn-danger ml-auto" id="log-out-btn">Log Out</button>
+    </nav>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <div id="currentPath" class="alert alert-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class=" container text-center mt-3 mb-3">
+        <button id="btn-back" class="btn btn-primary" disabled>Назад</button>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group text">
+                <label for="fileInput">Выберите файл для загрузки:</label>
+                <input type="file" id="fileInput" name="fileInput" class="form-control-file text-center">
+            </div>
+            <input type="hidden" id="pathInput" name="pathInput" value="{{ currentPath }}">
+            <button id="uploadButton" type="submit" class="btn btn-success text-center">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Загрузить файл
+            </button>
+        </form>
+
+    </div>
+
+    <script hidden>
+        const form = document.getElementById('uploadForm');
+        const uploadButton = document.getElementById('uploadButton');
+
+        uploadButton.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+
+
+            fetch('/users/' + currentPath, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    // убираем анимацию загрузки
+                    // ...
+                    if (response.ok) {
+                        alert('Файл успешно загружен');
+                    } else {
+                        alert('Произошла ошибка загрузки файла');
+                    }
+                })
+                .catch(error => {
+                    // убираем анимацию загрузки
+                    // ...
+                    console.log('Произошла ошибка загрузки файла: ' + error.message);
+                });
+            location.reload();
+        });
+
+
+    </script>
+
+    <script hidden>
+        const btnBack = document.getElementById('btn-back');
+        btnBack.addEventListener('click', function () {
+
+            // Разбиваем путь на массив
+            var pathArray = currentPath.split('/');
+
+            if (pathArray[pathArray.length - 1] === '') {
+                // Если последний элемент пустой, удаляем его дважды
+                pathArray.pop();
+                pathArray.pop();
+            } else {
+                // Иначе удаляем его один раз
+                pathArray.pop();
+            }
+            
+
+            // Объединяем элементы массива обратно в строку
+            const newPath = pathArray.join('/');
+
+            // Обновляем переменную currentPath новым путем
+            localStorage.setItem('currentPath', newPath);
+            location.reload();
+        });
+
+    </script>
+
+    <!-- HTML код компонента -->
+    <div class="container">
+        <table id="file-table" class="table">
+        </table>
+    </div>
+
+    <script>
+        // Получаем элемент таблицы
+        const table = document.querySelector('#fileListTable tbody');
+
+        // Функция для заполнения таблицы данными из массива JSON
+        function populateTable(data) {
+            const table = document.getElementById("file-table");
+
+            // clear table
+            table.innerHTML = "";
+
+            // create table header
+            const header = table.createTHead().insertRow();
+            const headerColumns = ["Name", "Extension", "Last Modified", "Actions"];
+            headerColumns.forEach((col) => {
+                const th = document.createElement("th");
+                th.textContent = col;
+                header.appendChild(th);
+            });
+
+            // create table body
+            const body = table.createTBody();
+            data.forEach((item) => {
+                const row = body.insertRow();
+
+                // add columns
+                const nameCell = row.insertCell();
+                const extCell = row.insertCell();
+                const dateCell = row.insertCell();
+                const actionCell = row.insertCell();
+
+                nameCell.textContent = item.name;
+                extCell.textContent = item.extension;
+                dateCell.textContent = new Date(item.lastModified).toLocaleString();
+
+                // add actions
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.addEventListener("click", () => {
+                    console.log(`Deleting file: ${item.name}`);
+                    var url = "/users/" + currentPath + item.name + (item.extension == "folder" ? "" : item.extension);
+
+                    fetch(url, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                console.log(`File deleted: ${item.name}`);
+                                location.reload();
+                            } else {
+                                throw new Error(`Error deleting file: ${item.name}`);
+                            }
+                        })
+                        .catch(error => console.error(error));
+
+                });
+
+                const moveButton = document.createElement("button");
+                moveButton.textContent = "Move";
+                moveButton.addEventListener("click", () => {
+                    console.log(`Moving file: ${item.name}`);
+                });
+
+                actionCell.appendChild(deleteButton);
+                actionCell.appendChild(moveButton);
+
+                // add double-click event for folders
+                if (item.extension === "folder") {
+                    row.addEventListener("dblclick", () => {
+                        localStorage.setItem("currentPath", currentPath + item.name + "/");
+                        location.reload();
+                    });
+                    row.style.cursor = "pointer";
+                }
+            });
+        }
+
+
+        function sendGetRequest() {
+            fetch('/users/' + currentPath)
+                .then(response => response.json())
+                .then(data => {
+                    //console.log(data)
+                    populateTable(data);
+                })
+                .catch(error => console.error(error));
+        }
+    </script>
+
+    <script>
+        // Get the Log Out button element
+        const logOutBtn = document.getElementById("log-out-btn");
+
+        // Add event listener for click event
+        logOutBtn.addEventListener("click", async () => {
+            // Remove username and password from Cookies
+            document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+            // Redirect to login page
+            window.location.href = "/";
+        });
+    </script>
+
+    <script defer>
+        const username = getCookie('username');
+        const password = getCookie('password');
+        const currentPathElement = document.getElementById('currentPath');
+
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return '';
+        }
+
+        let currentPath = localStorage.getItem('currentPath');
+
+        if (!currentPath || !currentPath.startsWith(username + "/")) {
+            currentPath = username + "/";
+            localStorage.setItem('currentPath', currentPath);
+        }
+
+        if (currentPath[currentPath.length - 1] != "/") {
+            currentPath = currentPath + "/";
+        }
+
+        currentPathElement.innerText = currentPath;
+        sendGetRequest();
+
+        if (currentPath === 'username/') {
+            btnBack.disabled = true;
+        } else {
+            btnBack.disabled = false;
+        }
+
+    </script>
+
+</body>
+</html>

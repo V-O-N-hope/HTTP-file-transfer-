@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Registration</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <a class="navbar-brand" href="/">My Drive</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto mr-2">
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin.html" >Sign In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/emailverification.html">Verify email</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <h2 class="text-center mb-4">Registration</h2>
+                <form method="post">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" class="form-control" name="username" id="username" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" class="form-control" name="email" id="email" placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" id="password" placeholder="Enter password">
+                            <button type="button" id="togglePassword" class="btn btn-secondary"><i class="far fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password:</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="confirm_password" id="confirm_password" placeholder="Confirm password">
+                            <button type="button" id="togglePassword2" class="btn btn-secondary"><i class="far fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btnRegister">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.2/js/bootstrap.min.js"></script>
+    <script>
+        const togglePasswordBtn = document.getElementById("togglePassword");
+        const togglePassword2Btn = document.getElementById("togglePassword2");
+        const passwordField = document.getElementById("password");
+        const password2Field = document.getElementById("confirm_password");
+        togglePasswordBtn.addEventListener("click", function () {
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                togglePasswordBtn.innerHTML = '<i class="far fa-eye-slash"></i>';
+            } else {
+                passwordField.type = "password";
+                togglePasswordBtn.innerHTML = '<i class="far fa-eye"></i>';
+            }
+        });
+        togglePassword2Btn.addEventListener("click", function () {
+            if (password2Field.type === "password") {
+                password2Field.type = "text";
+                togglePassword2Btn.innerHTML = '<i class="far fa-eye-slash"></i>';
+            } else {
+                password2Field.type = "password";
+                togglePassword2Btn.innerHTML = '<i class="far fa-eye"></i>';
+            }
+        });
+    </script>
+
+    <script>
+            async function hash(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray
+                .map((bytes) => bytes.toString(16).padStart(2, '0'))
+                .join('');
+            return hashHex;
+        }
+    </script>
+
+    <script>
+        var usernameCtrl = document.getElementById("username");
+        var emailCtrl = document.getElementById("email");
+        var passwordCtrl = document.getElementById("password");
+        var secPasswordCtrl = document.getElementById("confirm_password");
+
+        function reset() {
+            usernameCtrl.value = emailCtrl.value =
+                passwordCtrl.value = secPasswordCtrl.value = "";
+        }
+
+        document.getElementById("btnRegister").addEventListener("click", async () => {
+            var name = usernameCtrl.value.trim();
+            var email = emailCtrl.value;
+            var password = passwordCtrl.value;
+            var secPassword = secPasswordCtrl.value;
+
+            reset();
+
+            var hasError = false;
+            var nameError = '';
+            var emailError = '';
+            var passwordError = '';
+
+            // Проверяем корректность имени
+            if (!name) {
+                hasError = true;
+                nameError = 'Имя не может быть пустым';
+            }
+
+            // Проверяем корректность почты
+            if (!email) {
+                hasError = true;
+                emailError = 'Почта не может быть пустой!';
+            } else {
+                // Используем регулярное выражение для проверки формата почты
+                var emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+                if (!emailRegex.test(email)) {
+                    hasError = true;
+                    emailError = 'Некорректный формат почты';
+                }
+            }
+
+            // Проверяем совпадение паролей
+            if (password !== secPassword) {
+                hasError = true;
+                passwordError = 'Пароли не совпадают';
+            }
+
+            if (password == '') {
+                hasError = true;
+                passwordError = 'Пароль не может быть пустым!'
+            }
+
+            // Если есть ошибки, отображаем их на компонентах
+            if (hasError) {
+                usernameCtrl.style.border = nameError ? '1px solid red' : '';
+                usernameCtrl.placeholder = nameError == '' ? name : nameError;
+                emailCtrl.style.border = emailError ? '1px solid red' : '';
+                emailCtrl.placeholder = emailError == '' ? email : emailError;
+
+                passwordCtrl.style.border = passwordError ? '1px solid red' : '';
+                passwordCtrl.placeholder = password == '' ? "Пароле не может быть пустым!" : passwordError;
+                secPasswordCtrl.style.border = passwordError ? '1px solid red' : '';
+                secPasswordCtrl.placeholder = passwordError == '' ? '' : passwordError;
+            }
+            else {
+                var uniqKey = await hash(name + email + password);
+                var url = "/user_reg"; // замените на URL вашего сервера
+                var params = {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: "name=" + encodeURIComponent(name) + "&email=" +
+                        encodeURIComponent(email) + "&password=" + encodeURIComponent(password) +
+                        "&uniqKey=" + encodeURIComponent(uniqKey)
+
+                };
+
+                fetch(url, params)
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log("Response data:", data);
+                        if (data == "user_exists") {
+                            usernameCtrl.style.border = '1px solid red';
+                            usernameCtrl.placeholder = "Это имя уже возможно занято";
+                            emailCtrl.style.border = '1px solid red';
+                            emailCtrl.placeholder = "Эта почта возможно уже занята";
+                            passwordCtrl.placeholder = "Enter password";
+                            secPasswordCtrl.placeholder = "Confirm password";
+                            alert("Введите другую почту или имя");
+                        } else if (data == "all_ok") {
+                            url = "/user_add";
+                            fetch(url, params);
+                            alert("Вам будет отправлено сообщение на почту для подтверждения регистрации. Внимательно проверьте и спам");
+                            fetch("/");
+                            window.location.href = "/"
+                        }
+                    })
+                    .catch(error => console.error(error));
+            }
+        });
+
+    </script>
+
+</body>
+</html>

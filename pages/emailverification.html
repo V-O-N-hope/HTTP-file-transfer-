@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Верификация почты</title>
+    <!-- Подключение библиотеки Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Подключение скрипта для проверки ввода токена -->
+    <script>
+        function verifyToken() {
+            var tokenInput = document.getElementById("tokenInput");
+            var token = tokenInput.value;
+            if (token.trim() === "") {
+                tokenInput.classList.add("is-invalid");
+                tokenInput.placeholder = "Токен не может быть пустым";
+            } else {
+                var url = "/user_verify";
+                console.log(token);
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: "token=" + encodeURIComponent(token)
+                })
+                    .then(response => response.text())
+                    .then(result => {
+                        if (result == "ok") {
+                            alert("Ваша почта была подтверждена");
+                            window.location.href = "/";
+                        }
+                        if (result == "invalid") {
+                            tokenInput.placeholder = "Некорретный токен";
+
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+
+            }
+        }
+    </script>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-light bg-dark">
+        <a class="navbar-brand" href="/">My Drive</a>
+        <button class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto mr-2">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/register.html">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin.html">Sign In</a>
+                </li>
+                
+            </ul>
+        </div>
+
+    </nav>
+
+    <div class="container mt-5">
+        <h1>Верификация почты</h1>
+        <form>
+            <div class="form-group">
+                <label for="tokenInput">Введите токен, полученный по почте:</label>
+                <input type="text" class="form-control" id="tokenInput" placeholder="Введите токен">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="verifyToken()">Verify</button>
+        </form>
+    </div>
+    <!-- Подключение скриптов Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
